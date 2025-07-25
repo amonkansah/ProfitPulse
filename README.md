@@ -1,1 +1,519 @@
-# ProfitPulse
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ProfitPulse</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * {
+      font-family: 'Poppins', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f0f4f8;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .form input, .form select, .form button {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .form button {
+      background-color: #2c3e50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .form button:hover {
+      background-color: #34495e;
+    }
+
+    .output {
+      margin-top: 30px;
+    }
+
+    .summary, canvas {
+      margin-top: 20px;
+    }
+
+    .summary-box {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      background: #ecf0f1;
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+
+    .summary-box div {
+      margin: 10px;
+      font-weight: bold;
+    }
+
+    .green {
+      color: #27ae60;
+    }
+
+    .red {
+      color: #e74c3c;
+    }
+
+    @media screen and (max-width: 600px) {
+      .summary-box {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    #landing {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white !important;
+      color: black !important;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 2000;
+      opacity: 1;
+      transition: opacity 1s ease;
+      text-align: center;
+      font-weight: bold;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    #landing.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .landing-text h1,
+    .landing-text h2 {
+      margin: 0;
+      font-weight: bold;
+    }
+
+    .landing-text h1 {
+      font-size: 3rem;
+      animation: pulse 1.5s infinite;
+      color: black;
+      font-weight: bold;
+    }
+
+    .landing-text h2 {
+      font-size: 1.8rem;
+      margin-top: 10px;
+      animation: pulse 1.5s infinite
+    }
+
+    #landing .green {
+      color: gold;
+      font-weight: bold;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .history {
+      margin-top: 30px;
+    }
+
+    .history table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .history th, .history td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    .history button {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      margin: 0 2px;
+      cursor: pointer;
+    }
+
+    .history .edit-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+    }
+
+    .history .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+    }
+
+    .download-btn {
+      margin-top: 20px;
+      padding: 10px;
+      border: none;
+      background-color: #2c3e50;
+      color: white;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* Dark Mode Styles */
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .container {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    .dark-mode input,
+    .dark-mode select,
+    .dark-mode button {
+      background-color: #2c2c2c;
+      color: #e0e0e0;
+      border: 1px solid #555;
+    }
+
+    .dark-mode .summary-box {
+      background-color: #2c2c2c;
+    }
+
+    .dark-mode .history table {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+
+    .dark-mode .history th,
+    .dark-mode .history td {
+      border: 1px solid #555;
+    }
+
+    .dark-mode .download-btn {
+      background-color: #34495e;
+    }
+
+    .dark-mode .form button:hover {
+      background-color: #3c5a72;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toggle Dark Mode Button -->
+  <button id="darkModeToggle" style="position: fixed; top: 20px; right: 20px; z-index: 3000; padding: 10px; border-radius: 8px; border: none; background-color: #2c3e50; color: white; cursor: pointer;">Toggle Dark Mode</button>
+
+  <!-- Landing Page -->
+  <div id="landing">
+    <div class="landing-text">
+      <h1>WELCOME</h1>
+      <h2>LET'S CHECK YOUR PULSE <span class="green">₵</span></h2>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="container" id="app" style="display: none;">
+    <h1>ProfitPulse</h1>
+    <div class="form">
+      <input type="text" id="entryName" placeholder="Entry Description (e.g., Product Sales)" />
+      <input type="number" id="entryAmount" placeholder="Amount" />
+      <select id="entryCategory">
+        <option value="revenue">Revenue</option>
+        <option value="income">Income</option>
+        <option value="expenditure">Expenditure</option>
+      </select>
+      <button onclick="addEntry()">Add Entry</button>
+    </div>
+
+    <div class="output">
+      <div class="summary" id="summarySection">
+        <h2>Financial Summary</h2>
+        <div class="summary-box" id="reportBox">
+          <div>Total Revenue: <span id="revTotal">0</span></div>
+          <div>Total Income: <span id="incTotal">0</span></div>
+          <div>Total Expenditure: <span id="expTotal">0</span></div>
+          <div>Net Result: <span id="netResult">–</span></div>
+        </div>
+      </div>
+
+      <button class="download-btn" onclick="downloadPDF()">Download Summary as PDF</button>
+
+      <canvas id="pieChart" width="400" height="250"></canvas>
+      <canvas id="barChart" width="400" height="250"></canvas>
+      <canvas id="lineChart" width="400" height="250"></canvas>
+
+
+      <div class="history">
+        <h2>Entry History</h2>
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Amount (₵)</th>
+              <th>Category</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Landing Page
+    setTimeout(() => document.getElementById('landing').classList.add('fade-out'), 4000);
+    setTimeout(() => {
+      document.getElementById('landing').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+    }, 5000);
+
+    let entries = [];
+    let pieChartInstance = null;
+    let barChartInstance = null;
+
+    function addEntry() {
+      const name = document.getElementById('entryName').value.trim();
+      const amount = parseFloat(document.getElementById('entryAmount').value);
+      const category = document.getElementById('entryCategory').value;
+
+      if (!name || isNaN(amount)) {
+        alert('Please enter a valid description and amount.');
+        return;
+      }
+
+      entries.push({ name, amount, category });
+      clearForm();
+      updateUI();
+    }
+
+    function clearForm() {
+      document.getElementById('entryName').value = '';
+      document.getElementById('entryAmount').value = '';
+      document.getElementById('entryCategory').value = 'revenue';
+    }
+
+    function updateUI() {
+      const revenue = entries.filter(e => e.category === 'revenue').reduce((sum, e) => sum + e.amount, 0);
+      const income = entries.filter(e => e.category === 'income').reduce((sum, e) => sum + e.amount, 0);
+      const expenditure = entries.filter(e => e.category === 'expenditure').reduce((sum, e) => sum + e.amount, 0);
+      const net = revenue + income - expenditure;
+
+      document.getElementById('revTotal').textContent = `+₵${revenue.toFixed(2)}`;
+      document.getElementById('revTotal').className = 'green';
+
+      document.getElementById('incTotal').textContent = `+₵${income.toFixed(2)}`;
+      document.getElementById('incTotal').className = 'green';
+
+      document.getElementById('expTotal').textContent = `-₵${expenditure.toFixed(2)}`;
+      document.getElementById('expTotal').className = 'red';
+
+      const netSpan = document.getElementById('netResult');
+      if (net >= 0) {
+        netSpan.textContent = `+₵${net.toFixed(2)}`;
+        netSpan.className = 'green';
+      } else {
+        netSpan.textContent = `-₵${Math.abs(net).toFixed(2)}`;
+        netSpan.className = 'red';
+      }
+
+      renderPieChart(revenue, income, expenditure);
+      renderBarChart();
+      renderLineChart();
+      renderHistoryTable();
+    }
+
+    function renderPieChart(revenue, income, expenditure) {
+      const ctx = document.getElementById('pieChart').getContext('2d');
+      if (pieChartInstance) pieChartInstance.destroy();
+
+      pieChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Revenue', 'Income', 'Expenditure'],
+          datasets: [{
+            data: [revenue, income, expenditure],
+            backgroundColor: ['#27ae60', '#2980b9', '#e74c3c']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    function renderBarChart() {
+      const ctx = document.getElementById('barChart').getContext('2d');
+      const revenue = entries.filter(e => e.category === 'revenue').reduce((sum, e) => sum + e.amount, 0);
+      const income = entries.filter(e => e.category === 'income').reduce((sum, e) => sum + e.amount, 0);
+      const expenditure = entries.filter(e => e.category === 'expenditure').reduce((sum, e) => sum + e.amount, 0);
+
+      if (barChartInstance) barChartInstance.destroy();
+
+      barChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Revenue', 'Income', 'Expenditure'],
+          datasets: [{
+            label: 'Amount (₵)',
+            data: [revenue, income, expenditure],
+            backgroundColor: ['#2ecc71', '#3498db', '#e74c3c']
+          }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+function renderLineChart() {
+  const ctx = document.getElementById('lineChart').getContext('2d');
+
+  const income = entries.filter(e => e.category === 'income').reduce((sum, e) => sum + e.amount, 0);
+  const expenditure = entries.filter(e => e.category === 'expenditure').reduce((sum, e) => sum + e.amount, 0);
+
+  if (window.lineChartInstance) {
+    window.lineChartInstance.destroy();
+  }
+
+  window.lineChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Income', 'Expenditure'],
+      datasets: [{
+        label: 'Amount (₵)',
+        data: [income, expenditure],
+        borderColor: '#8e44ad',
+        backgroundColor: 'rgba(142, 68, 173, 0.2)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Income vs Expenditure (Line Chart)'
+        },
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+
+    function renderHistoryTable() {
+      const tableBody = document.querySelector('#historyTable tbody');
+      tableBody.innerHTML = '';
+      entries.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${entry.name}</td>
+          <td>₵${entry.amount.toFixed(2)}</td>
+          <td>${entry.category}</td>
+          <td>
+            <button class="edit-btn" onclick="editEntry(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteEntry(${index})">Delete</button>
+          </td>`;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function deleteEntry(index) {
+      if (confirm('Are you sure you want to delete this entry?')) {
+        entries.splice(index, 1);
+        updateUI();
+      }
+    }
+
+    function editEntry(index) {
+      const entry = entries[index];
+      document.getElementById('entryName').value = entry.name;
+      document.getElementById('entryAmount').value = entry.amount;
+      document.getElementById('entryCategory').value = entry.category;
+      entries.splice(index, 1);
+      updateUI();
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      const summary = document.querySelector('.summary');
+      const pieCanvas = document.getElementById('pieChart');
+      const barCanvas = document.getElementById('barChart');
+
+
+      const summaryImg = await html2canvas(summary).then(canvas => canvas.toDataURL('image/png'));
+      const pieImg = pieCanvas.toDataURL('image/png');
+      const barImg = barCanvas.toDataURL('image/png');
+
+      let y = 10;
+      pdf.addImage(summaryImg, 'PNG', 10, y, 190, 40);
+      y += 50;
+
+      pdf.text("Pie Chart", 10, y);
+      y += 5;
+      pdf.addImage(pieImg, 'PNG', 10, y, 90, 60);
+      y += 70;
+
+      pdf.text("Bar Chart", 10, y);
+      y += 5;
+      pdf.addImage(barImg, 'PNG', 10, y, 190, 60);
+
+      pdf.save('ProfitPulse_Summary.pdf');
+    }
+
+    // Dark Mode Toggle Script
+    document.getElementById('darkModeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+    });
+  </script>
+</body>
+</html>
